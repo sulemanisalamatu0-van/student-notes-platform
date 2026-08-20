@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Notes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .btn {
+      background: #1565c0;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    input {
+      padding: 10px;
+      width: 300px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .search-bar {
+      margin-bottom: 25px;
+    }
+    .search-button {
+      margin-left: 10px;
+    }
+    .show-all-button {
+      background: #666;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Student Notes</h1>
+    <a href="upload.html" class="btn">+ Upload Note</a>
+  </header>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by title or course...">
+    <button onclick="searchNotes()" class="btn search-button">Search</button>
+    <button onclick="loadNotes()" class="btn show-all-button">Show All</button>
+  </div>
+
+  <div id="notesList"></div>
+
+  <script>
+    let allNotes = [];
+
+    async function loadNotes() {
+      const res = await fetch('http://localhost:3000/api/notes');
+      allNotes = await res.json();
+      displayNotes(allNotes);
+    }
+
+    function displayNotes(notes) {
+      const container = document.getElementById('notesList');
+      container.innerHTML = '';
+
+      if (notes.length === 0) {
+        container.innerHTML = '<p>No notes uploaded yet.</p>';
+        return;
+      }
+
+      notes.forEach(note => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <h3>${note.title}</h3>
+          <p><strong>Course:</strong> ${note.course}</p>
+          <p><strong>Subject:</strong> ${note.subject || 'N/A'}</p>
+          <p>${note.description || ''}</p>
+          <p><small>Uploaded: ${note.created_at} | Downloads: ${note.downloads}</small></p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function searchNotes() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allNotes.filter(note =>
+        note.title.toLowerCase().includes(keyword) ||
+        note.course.toLowerCase().includes(keyword)
+      );
+      displayNotes(filtered);
+    }
+
+    loadNotes();
+  </script>
+</body>
+</html>
